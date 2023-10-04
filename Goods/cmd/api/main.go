@@ -22,6 +22,7 @@ type application struct {
 }
 
 func main() {
+
 	var cfg config
 
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
@@ -29,6 +30,7 @@ func main() {
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
 	app := &application{
 		config: cfg,
 		logger: logger,
@@ -36,7 +38,6 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
-	mux.HandleFunc("/v1/handcrafted-leather-goods", app.handcraftedLeatherGoodsHandler)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
@@ -48,20 +49,10 @@ func main() {
 
 	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
 	err := srv.ListenAndServe()
-	if err != nil {
-		logger.Fatal(err)
-	}
+	logger.Fatal(err)
 }
-
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status": "ok", "version": "` + version + `"}`))
-}
-
-func (app *application) handcraftedLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
-	leatherGoodsInfo := []byte(`{"goods": "Handcrafted Leather Goods Info"}`)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(leatherGoodsInfo)
+	fmt.Fprintln(w, "status: available")
+	fmt.Fprintf(w, "environment: %s\n", app.config.env)
+	fmt.Fprintf(w, "version: %s\n", version)
 }
