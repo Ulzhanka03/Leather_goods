@@ -4,7 +4,7 @@ import "time"
 
 type LeatherGoods struct {
 	ID          int64     `json:"id"`
-	CreatedAt   time.Time `json:"created_at"`
+	CreatedAt   time.Time `json:"-"`
 	Name        string    `json:"name"`
 	Type        string    `json:"type"`
 	Price       float64   `json:"price"`
