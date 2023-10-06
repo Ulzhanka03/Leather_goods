@@ -9,11 +9,11 @@ import (
 
 func (app *application) createLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name        string  `json:"name"`
-		Type        string  `json:"type"`
-		Price       float64 `json:"price"`
-		LeatherType string  `json:"leather_type"`
-		Color       string  `json:"color"`
+		Name        string     `json:"name"`
+		Type        string     `json:"type"`
+		Price       data.Price `json:"price"`
+		LeatherType string     `json:"leather_type"`
+		Color       string     `json:"color"`
 	}
 	err := app.readJSON(w, r, &input)
 	if err != nil {
