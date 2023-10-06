@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"goods/Goods/internal/data"
 	"net/http"
@@ -8,7 +9,19 @@ import (
 )
 
 func (app *application) createLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new leather good")
+	var input struct {
+		Name        string  `json:"name"`
+		Type        string  `json:"type"`
+		Price       float64 `json:"price"`
+		LeatherType string  `json:"leather_type"`
+		Color       string  `json:"color"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+	fmt.Fprintf(w, "%+v\n", input)
 }
 func (app *application) showLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
