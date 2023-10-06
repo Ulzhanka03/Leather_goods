@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"goods/Goods/internal/data"
 	"net/http"
@@ -16,7 +15,7 @@ func (app *application) createLeatherGoodsHandler(w http.ResponseWriter, r *http
 		LeatherType string  `json:"leather_type"`
 		Color       string  `json:"color"`
 	}
-	err := json.NewDecoder(r.Body).Decode(&input)
+	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
