@@ -28,7 +28,7 @@ func (app *application) showLeatherGoodsHandler(w http.ResponseWriter, r *http.R
 		Color:       "Brown",
 		Version:     1,
 	}
-	err = app.writeJSON(w, http.StatusOK, leatherGood, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"leatherGood": leatherGood}, nil)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
