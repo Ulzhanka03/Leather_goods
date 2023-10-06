@@ -7,7 +7,7 @@ type LeatherGoods struct {
 	CreatedAt   time.Time `json:"-"`
 	Name        string    `json:"name"`
 	Type        string    `json:"type"`
-	Price       float64   `json:"price"`
+	Price       Price     `json:"price"`
 	LeatherType string    `json:"leather_type"`
 	Color       string    `json:"color"`
 	Version     int32     `json:"version"`
