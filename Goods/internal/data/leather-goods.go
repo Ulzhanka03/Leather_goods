@@ -3,6 +3,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"goods/Goods/internal/validator"
 	"time"
 )
 
@@ -33,4 +34,12 @@ func (l LeatherGoods) MarshalJSON() ([]byte, error) {
 		Price:             price,
 	}
 	return json.Marshal(aux)
+}
+func ValidateLeatherGoods(v *validator.Validator, leatherGoods *LeatherGoods) {
+	v.Check(leatherGoods.Name != "", "name", "must be provided")
+	v.Check(len(leatherGoods.Name) <= 500, "name", "must not be more than 500 bytes long")
+	v.Check(leatherGoods.Price != 0, "price", "must be provided")
+	v.Check(leatherGoods.Type != "", "type", "must be provided")
+	v.Check(leatherGoods.LeatherType != "", "leather_type", "must be provided")
+	v.Check(leatherGoods.Color != "", "color", "must be provided")
 }
