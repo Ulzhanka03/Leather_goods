@@ -1,1 +1,0 @@
-export GOODS_DB_DSN='postgres://goods:pa55word@localhost/goods'
