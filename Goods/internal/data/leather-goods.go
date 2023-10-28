@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"goods/Goods/internal/validator"
@@ -42,4 +43,24 @@ func ValidateLeatherGoods(v *validator.Validator, leatherGoods *LeatherGoods) {
 	v.Check(leatherGoods.Type != "", "type", "must be provided")
 	v.Check(leatherGoods.LeatherType != "", "leather_type", "must be provided")
 	v.Check(leatherGoods.Color != "", "color", "must be provided")
+}
+
+type LeatherGoodsModel struct {
+	DB *sql.DB
+}
+
+func (l LeatherGoodsModel) Insert(leatherGoods *LeatherGoods) error {
+	return nil
+}
+
+func (l LeatherGoodsModel) Get(id int64) (*LeatherGoods, error) {
+	return nil, nil
+}
+
+func (l LeatherGoodsModel) Update(leatherGoods *LeatherGoods) error {
+	return nil
+}
+
+func (l LeatherGoodsModel) Delete(id int64) error {
+	return nil
 }
