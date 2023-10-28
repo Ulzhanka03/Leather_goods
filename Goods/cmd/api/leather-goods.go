@@ -33,6 +33,18 @@ func (app *application) createLeatherGoodsHandler(w http.ResponseWriter, r *http
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
+	err = app.models.LeatherGoods.Insert(leatherGoods)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/leather-goods/%d", leatherGoods.ID))
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"leather-good": leatherGoods}, headers)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 	v.Check(input.Name != "", "name", "must be provided")
 	v.Check(len(input.Name) <= 500, "name", "must not be more than 500 bytes long")
 	v.Check(input.Price != 0, "price", "must be provided")
@@ -44,7 +56,7 @@ func (app *application) createLeatherGoodsHandler(w http.ResponseWriter, r *http
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	fmt.Fprintf(w, "%+v\n", input)
+
 }
 func (app *application) showLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
@@ -52,7 +64,6 @@ func (app *application) showLeatherGoodsHandler(w http.ResponseWriter, r *http.R
 		app.notFoundResponse(w, r)
 		return
 	}
-	//fmt.Fprintf(w, "show the details of leather good %d\n", id)
 
 	leatherGood := data.LeatherGoods{
 		ID:          id,

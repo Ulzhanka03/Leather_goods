@@ -44,13 +44,20 @@ func ValidateLeatherGoods(v *validator.Validator, leatherGoods *LeatherGoods) {
 	v.Check(leatherGoods.LeatherType != "", "leather_type", "must be provided")
 	v.Check(leatherGoods.Color != "", "color", "must be provided")
 }
+func (l LeatherGoodsModel) Insert(leatherGoods *LeatherGoods) error {
+
+	query := `
+INSERT INTO leathergoods (name, type, price, leather_type, color)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, created_at, version`
+
+	args := []interface{}{leatherGoods.Name, leatherGoods.Type, leatherGoods.Price, leatherGoods.LeatherType, leatherGoods.Color}
+
+	return l.DB.QueryRow(query, args...).Scan(&leatherGoods.ID, &leatherGoods.CreatedAt, &leatherGoods.Version)
+}
 
 type LeatherGoodsModel struct {
 	DB *sql.DB
-}
-
-func (l LeatherGoodsModel) Insert(leatherGoods *LeatherGoods) error {
-	return nil
 }
 
 func (l LeatherGoodsModel) Get(id int64) (*LeatherGoods, error) {
