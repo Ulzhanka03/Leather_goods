@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"goods/Goods/internal/validator"
 	"time"
@@ -47,7 +48,7 @@ func ValidateLeatherGoods(v *validator.Validator, leatherGoods *LeatherGoods) {
 func (l LeatherGoodsModel) Insert(leatherGoods *LeatherGoods) error {
 
 	query := `
-INSERT INTO leathergoods (name, type, price, leather_type, color)
+INSERT INTO leatherGoods (name, type, price, leather_type, color)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING id, created_at, version`
 
@@ -61,7 +62,36 @@ type LeatherGoodsModel struct {
 }
 
 func (l LeatherGoodsModel) Get(id int64) (*LeatherGoods, error) {
-	return nil, nil
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	query := `
+		SELECT id, created_at, name, type, price, leather_type, color, version
+		FROM leatherGoods
+		WHERE id = $1`
+
+	var leatherGoods LeatherGoods
+	err := l.DB.QueryRow(query, id).Scan(
+		&leatherGoods.ID,
+		&leatherGoods.CreatedAt,
+		&leatherGoods.Name,
+		&leatherGoods.Type,
+		&leatherGoods.Price,
+		&leatherGoods.LeatherType,
+		&leatherGoods.Color,
+		&leatherGoods.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &leatherGoods, nil
 }
 
 func (l LeatherGoodsModel) Update(leatherGoods *LeatherGoods) error {

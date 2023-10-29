@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"goods/Goods/internal/data"
 	"goods/Goods/internal/validator"
 	"net/http"
-	"time"
 )
 
 func (app *application) createLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,17 +63,17 @@ func (app *application) showLeatherGoodsHandler(w http.ResponseWriter, r *http.R
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
-	}
 
-	leatherGood := data.LeatherGoods{
-		ID:          id,
-		CreatedAt:   time.Now(),
-		Name:        "Handcrafted Leather Bag",
-		Type:        "Portfolio",
-		Price:       99.99,
-		LeatherType: "Natural",
-		Color:       "Brown",
-		Version:     1,
+	}
+	leatherGood, err := app.models.LeatherGoods.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
 	err = app.writeJSON(w, http.StatusOK, envelope{"leatherGood": leatherGood}, nil)
 	if err != nil {
