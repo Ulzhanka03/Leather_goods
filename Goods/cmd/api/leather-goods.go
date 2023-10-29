@@ -80,3 +80,58 @@ func (app *application) showLeatherGoodsHandler(w http.ResponseWriter, r *http.R
 		app.serverErrorResponse(w, r, err)
 	}
 }
+func (app *application) updateLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
+
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	leatherGoods, err := app.models.LeatherGoods.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	var input struct {
+		Name        string  `json:"name"`
+		Type        string  `json:"type"`
+		Price       float64 `json:"price"`
+		LeatherType string  `json:"leather_type"`
+		Color       string  `json:"color"`
+	}
+
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	leatherGoods.Name = input.Name
+	leatherGoods.Type = input.Type
+	leatherGoods.Price = input.Price
+	leatherGoods.LeatherType = input.LeatherType
+	leatherGoods.Color = input.Color
+
+	v := validator.New()
+	if data.ValidateLeatherGoods(v, leatherGoods); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.models.LeatherGoods.Update(leatherGoods)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"leather goods": leatherGoods}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}

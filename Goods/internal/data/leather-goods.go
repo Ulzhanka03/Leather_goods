@@ -95,7 +95,23 @@ func (l LeatherGoodsModel) Get(id int64) (*LeatherGoods, error) {
 }
 
 func (l LeatherGoodsModel) Update(leatherGoods *LeatherGoods) error {
-	return nil
+	query := `
+		UPDATE leatherGoods
+		SET name = $1, type = $2, price = $3, leather_type = $4, color = $5, version = version + 1
+		WHERE id = $6
+		RETURNING version`
+
+	args := []interface{}{
+		leatherGoods.Name,
+		leatherGoods.Type,
+		leatherGoods.Price,
+		leatherGoods.LeatherType,
+		leatherGoods.Color,
+		leatherGoods.ID,
+	}
+
+	return l.DB.QueryRow(query, args...).Scan(&leatherGoods.Version)
+
 }
 
 func (l LeatherGoodsModel) Delete(id int64) error {
