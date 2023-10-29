@@ -16,6 +16,7 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPost, "/v1/leather-goods", app.createLeatherGoodsHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/leather-goods/:id", app.showLeatherGoodsHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/leather-goods/:id", app.updateLeatherGoodsHandler)
+	router.HandlerFunc(http.MethodDelete, "/v1/leather-goods/:id", app.deleteLeatherGoodsHandler)
 
 	return router
 }
