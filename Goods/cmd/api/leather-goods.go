@@ -136,7 +136,12 @@ func (app *application) updateLeatherGoodsHandler(w http.ResponseWriter, r *http
 
 	err = app.models.LeatherGoods.Update(leatherGoods)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 

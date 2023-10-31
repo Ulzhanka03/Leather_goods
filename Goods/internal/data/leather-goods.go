@@ -98,7 +98,7 @@ func (l LeatherGoodsModel) Update(leatherGoods *LeatherGoods) error {
 	query := `
 		UPDATE leatherGoods
 		SET name = $1, type = $2, price = $3, leather_type = $4, color = $5, version = version + 1
-		WHERE id = $6
+		WHERE id = $6 AND version = $7
 		RETURNING version`
 
 	args := []interface{}{
@@ -108,10 +108,19 @@ func (l LeatherGoodsModel) Update(leatherGoods *LeatherGoods) error {
 		leatherGoods.LeatherType,
 		leatherGoods.Color,
 		leatherGoods.ID,
+		leatherGoods.Version,
 	}
 
-	return l.DB.QueryRow(query, args...).Scan(&leatherGoods.Version)
-
+	err := l.DB.QueryRow(query, args...).Scan(&leatherGoods.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+	return nil
 }
 
 func (l LeatherGoodsModel) Delete(id int64) error {
