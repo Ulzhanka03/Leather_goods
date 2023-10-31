@@ -163,12 +163,14 @@ func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([
 		FROM leatherGoods
 		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', color) @@ plainto_tsquery('simple', $2) OR $2 = '')
-		ORDER BY %s %s, id ASC`, filters.sortColumn(), filters.sortDirection())
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+	args := []interface{}{name, color, filters.limit(), filters.offset()}
 
-	rows, err := l.DB.QueryContext(ctx, query, name, color)
+	rows, err := l.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
