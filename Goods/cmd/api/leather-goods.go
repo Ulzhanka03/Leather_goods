@@ -177,8 +177,8 @@ func (app *application) deleteLeatherGoodsHandler(w http.ResponseWriter, r *http
 func (app *application) listLeatherGoodsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var input struct {
-		Name string
-		Type string
+		Name  string
+		Color string
 		data.Filters
 	}
 
@@ -187,17 +187,26 @@ func (app *application) listLeatherGoodsHandler(w http.ResponseWriter, r *http.R
 	qs := r.URL.Query()
 
 	input.Name = app.readString(qs, "name", "")
-	input.Type = app.readString(qs, "type", "")
+	input.Color = app.readString(qs, "color", "")
 
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
 
 	input.Filters.Sort = app.readString(qs, "sort", "id")
-	input.Filters.SortSafelist = []string{"id", "name", "type", "price", "-id", "-name", "-type", "-price"}
+	input.Filters.SortSafelist = []string{"id", "name", "color", "price", "-id", "-name", "-color", "-price"}
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", input)
+	leathergoods, err := app.models.LeatherGoods.GetAll(input.Name, input.Color, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"leather goods": leathergoods}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }

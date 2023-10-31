@@ -156,3 +156,49 @@ func (l LeatherGoodsModel) Delete(id int64) error {
 	}
 	return nil
 }
+func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([]*LeatherGoods, error) {
+
+	query := `
+		SELECT id, created_at, name, type, price, leather_type, color, version
+		FROM leatherGoods
+		ORDER BY id`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := l.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	leathergoods := []*LeatherGoods{}
+
+	for rows.Next() {
+
+		var leatherGoods LeatherGoods
+
+		err := rows.Scan(
+			&leatherGoods.ID,
+			&leatherGoods.CreatedAt,
+			&leatherGoods.Name,
+			&leatherGoods.Type,
+			&leatherGoods.Price,
+			&leatherGoods.LeatherType,
+			&leatherGoods.Color,
+			&leatherGoods.Version,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		leathergoods = append(leathergoods, &leatherGoods)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return leathergoods, nil
+}
