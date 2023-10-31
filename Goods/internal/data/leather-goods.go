@@ -161,12 +161,14 @@ func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([
 	query := `
 		SELECT id, created_at, name, type, price, leather_type, color, version
 		FROM leatherGoods
+		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
+		AND (LOWER(color) = LOWER($2) OR $2 = '')
 		ORDER BY id`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := l.DB.QueryContext(ctx, query)
+	rows, err := l.DB.QueryContext(ctx, query, name, color)
 	if err != nil {
 		return nil, err
 	}
