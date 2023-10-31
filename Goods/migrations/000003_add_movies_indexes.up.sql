@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS leathergoods_name_idx ON leatherGoods USING GIN (to_tsvector('simple', name));
+CREATE INDEX IF NOT EXISTS leathergoods_color_idx ON leatherGoods USING GIN (to_tsvector('simple', color));

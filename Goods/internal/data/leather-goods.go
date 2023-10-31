@@ -161,8 +161,8 @@ func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([
 	query := `
 		SELECT id, created_at, name, type, price, leather_type, color, version
 		FROM leatherGoods
-		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
-		AND (LOWER(color) = LOWER($2) OR $2 = '')
+		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		AND (to_tsvector('simple', color) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		ORDER BY id`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
