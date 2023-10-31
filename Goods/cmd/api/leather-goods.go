@@ -199,13 +199,13 @@ func (app *application) listLeatherGoodsHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	leathergoods, err := app.models.LeatherGoods.GetAll(input.Name, input.Color, input.Filters)
+	leathergoods, metadata, err := app.models.LeatherGoods.GetAll(input.Name, input.Color, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"leather goods": leathergoods}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"leather goods": leathergoods, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

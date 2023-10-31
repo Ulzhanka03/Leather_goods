@@ -156,10 +156,10 @@ func (l LeatherGoodsModel) Delete(id int64) error {
 	}
 	return nil
 }
-func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([]*LeatherGoods, error) {
+func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([]*LeatherGoods, Metadata, error) {
 
 	query := fmt.Sprintf(`
-		SELECT id, created_at, name, type, price, leather_type, color, version
+		SELECT count(*) OVER(), id, created_at, name, type, price, leather_type, color, version
 		FROM leatherGoods
 		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', color) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -172,11 +172,11 @@ func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([
 
 	rows, err := l.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
 	defer rows.Close()
-
+	totalRecords := 0
 	leathergoods := []*LeatherGoods{}
 
 	for rows.Next() {
@@ -184,6 +184,7 @@ func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([
 		var leatherGoods LeatherGoods
 
 		err := rows.Scan(
+			&totalRecords,
 			&leatherGoods.ID,
 			&leatherGoods.CreatedAt,
 			&leatherGoods.Name,
@@ -194,15 +195,15 @@ func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([
 			&leatherGoods.Version,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 
 		leathergoods = append(leathergoods, &leatherGoods)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
-
-	return leathergoods, nil
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	return leathergoods, metadata, nil
 }
