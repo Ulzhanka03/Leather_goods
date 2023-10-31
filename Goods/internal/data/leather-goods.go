@@ -158,12 +158,12 @@ func (l LeatherGoodsModel) Delete(id int64) error {
 }
 func (l LeatherGoodsModel) GetAll(name string, color string, filters Filters) ([]*LeatherGoods, error) {
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, created_at, name, type, price, leather_type, color, version
 		FROM leatherGoods
 		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', color) @@ plainto_tsquery('simple', $2) OR $2 = '')
-		ORDER BY id`
+		ORDER BY %s %s, id ASC`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
