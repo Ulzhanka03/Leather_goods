@@ -99,11 +99,11 @@ func (app *application) updateLeatherGoodsHandler(w http.ResponseWriter, r *http
 		return
 	}
 	var input struct {
-		Name        string  `json:"name"`
-		Type        string  `json:"type"`
-		Price       float64 `json:"price"`
-		LeatherType string  `json:"leather_type"`
-		Color       string  `json:"color"`
+		Name        *string  `json:"name"`
+		Type        *string  `json:"type"`
+		Price       *float64 `json:"price"`
+		LeatherType *string  `json:"leather_type"`
+		Color       *string  `json:"color"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -111,12 +111,22 @@ func (app *application) updateLeatherGoodsHandler(w http.ResponseWriter, r *http
 		app.badRequestResponse(w, r, err)
 		return
 	}
+	if input.Name != nil {
+		leatherGoods.Name = *input.Name
+	}
 
-	leatherGoods.Name = input.Name
-	leatherGoods.Type = input.Type
-	leatherGoods.Price = input.Price
-	leatherGoods.LeatherType = input.LeatherType
-	leatherGoods.Color = input.Color
+	if input.Type != nil {
+		leatherGoods.Type = *input.Type
+	}
+	if input.Price != nil {
+		leatherGoods.Price = *input.Price
+	}
+	if input.LeatherType != nil {
+		leatherGoods.LeatherType = *input.LeatherType
+	}
+	if input.Color != nil {
+		leatherGoods.Color = *input.Color
+	}
 
 	v := validator.New()
 	if data.ValidateLeatherGoods(v, leatherGoods); !v.Valid() {
