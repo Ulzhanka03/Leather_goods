@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -53,8 +54,9 @@ VALUES ($1, $2, $3, $4, $5)
 RETURNING id, created_at, version`
 
 	args := []interface{}{leatherGoods.Name, leatherGoods.Type, leatherGoods.Price, leatherGoods.LeatherType, leatherGoods.Color}
-
-	return l.DB.QueryRow(query, args...).Scan(&leatherGoods.ID, &leatherGoods.CreatedAt, &leatherGoods.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	return l.DB.QueryRowContext(ctx, query, args...).Scan(&leatherGoods.ID, &leatherGoods.CreatedAt, &leatherGoods.Version)
 }
 
 type LeatherGoodsModel struct {
@@ -71,7 +73,10 @@ func (l LeatherGoodsModel) Get(id int64) (*LeatherGoods, error) {
 		WHERE id = $1`
 
 	var leatherGoods LeatherGoods
-	err := l.DB.QueryRow(query, id).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := l.DB.QueryRowContext(ctx, query, id).Scan(
 		&leatherGoods.ID,
 		&leatherGoods.CreatedAt,
 		&leatherGoods.Name,
@@ -110,8 +115,9 @@ func (l LeatherGoodsModel) Update(leatherGoods *LeatherGoods) error {
 		leatherGoods.ID,
 		leatherGoods.Version,
 	}
-
-	err := l.DB.QueryRow(query, args...).Scan(&leatherGoods.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	err := l.DB.QueryRowContext(ctx, query, args...).Scan(&leatherGoods.Version)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -132,7 +138,10 @@ func (l LeatherGoodsModel) Delete(id int64) error {
 		DELETE FROM leatherGoods
 		WHERE id = $1`
 
-	result, err := l.DB.Exec(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := l.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
