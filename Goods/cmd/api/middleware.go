@@ -146,6 +146,6 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 		}
 		next.ServeHTTP(w, r)
 	})
-	
+
 	return app.requireAuthenticatedUser(fn)
 }
